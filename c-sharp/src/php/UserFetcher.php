@@ -7,9 +7,10 @@ class UserFetcher {
     function getNearestUserId() {
       $edinburghLat = 55.953251;
       $edinburghLng = -3.188267;
-
+      
       $users = getUsers();
       
+      $users = json_decode(file_get_contents('data.json'), true);
       $users = array_map(function($person) use ($edinburghLat, $edinburghLng) {
           $person['distance'] = haversineGreatCircleDistance($edinburghLat, $edinburghLng, $person['latitude'], $person['longitude']);
           return $person;
@@ -32,30 +33,16 @@ class UserFetcher {
 
 }
 
+function haversineGreatCircleDistance($fromLat, $fromLon, $toLat, $toLon) {
+    $earth_radius = 6371;
 
-/**
- * Calculates the great-circle distance between two points, with
- * the Haversine formula.
- * @param float $latitudeFrom Latitude of start point in [deg decimal]
- * @param float $longitudeFrom Longitude of start point in [deg decimal]
- * @param float $latitudeTo Latitude of target point in [deg decimal]
- * @param float $longitudeTo Longitude of target point in [deg decimal]
- * @param float $earthRadius Mean earth radius in [m]
- * @return float Distance between points in [m] (same as earthRadius)
- */
-function haversineGreatCircleDistance(
-    $latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371000)
-{
-    // convert from degrees to radians
-    $latFrom = deg2rad($latitudeFrom);
-    $lonFrom = deg2rad($longitudeFrom);
-    $latTo = deg2rad($latitudeTo);
-    $lonTo = deg2rad($longitudeTo);
+    $dLat = deg2rad($toLat - $fromLat);
+    $dLon = deg2rad($toLon - $fromLon);
 
-    $latDelta = $latTo - $latFrom;
-    $lonDelta = $lonTo - $lonFrom;
+    $a = sin($dLat/2) * sin($dLat/2) + cos(deg2rad($fromLat)) * cos(deg2rad($toLat)) * sin($dLon/2) * sin($dLon/2);
+    $c = 2 * asin(sqrt($a));
+    $d = $earth_radius * $c;
 
-    $angle = 2 * asin(sqrt(pow(sin($latDelta / 2), 2) +
-            cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)));
-    return $angle * $earthRadius;
+    return round($d);
 }
+

@@ -9,13 +9,14 @@ class UserFetcher {
     let users = getUsers();
 
     users = users.map((user) => {
-      user.distance = this.haversineDistance([edinburghLat, edinburghLng], [user.latitude, user.longitude], false);
+      user.distance = this.getDistanceFromLatLonInKm(edinburghLat, edinburghLng, user.latitude, user.longitude);
       return user;
     });
 
     users.sort((a, b) => {
       a = a['distance'];
       b = b['distance'];
+
       if (a == b) {
         return 0;
       }
@@ -23,28 +24,27 @@ class UserFetcher {
     });
 
     const closestUser = users[0];
-
     return closestUser["_id"];
   }
 
-  haversineDistance(latlngA, latlngB, isMiles) {
-    const toRad = x => (x * Math.PI) / 180;
-    const R = 6371; // km
-
-    const dLat = toRad(latlngB[1] - latlngA[1]);
-    const dLatSin = Math.sin(dLat / 2);
-    const dLon = toRad(latlngB[0] - latlngA[0]);
-    const dLonSin = Math.sin(dLon / 2);
-
-    const a = (dLatSin * dLatSin) +
-      (Math.cos(toRad(latlngA[1])) * Math.cos(toRad(latlngB[1])) * dLonSin * dLonSin);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    let distance = R * c;
-
-    if (isMiles) distance /= 1.60934;
-
-    return distance;
+  getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
+    var R = 6371; // Radius of the earth in km
+    var dLat = this.deg2rad(lat2-lat1);  // deg2rad below
+    var dLon = this.deg2rad(lon2-lon1);
+    var a =
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) *
+        Math.sin(dLon/2) * Math.sin(dLon/2)
+      ;
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    var d = R * c; // Distance in km
+    return d;
   }
+
+  deg2rad(deg) {
+    return deg * (Math.PI/180)
+  }
+
 }
 
 module.exports = UserFetcher;
