@@ -7,10 +7,9 @@ class UserFetcher {
     function getNearestUserId() {
       $edinburghLat = 55.953251;
       $edinburghLng = -3.188267;
-      
+
       $users = getUsers();
       
-      $users = json_decode(file_get_contents('data.json'), true);
       $users = array_map(function($person) use ($edinburghLat, $edinburghLng) {
           $person['distance'] = haversineGreatCircleDistance($edinburghLat, $edinburghLng, $person['latitude'], $person['longitude']);
           return $person;
@@ -27,7 +26,7 @@ class UserFetcher {
       });
       
       $closestUser = reset($users);
-      
+
       return $closestUser['_id'];
     }
 
