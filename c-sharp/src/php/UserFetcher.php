@@ -10,7 +10,6 @@ class UserFetcher {
       
       $users = getUsers();
       
-      $users = json_decode(file_get_contents('data.json'), true);
       $users = array_map(function($person) use ($edinburghLat, $edinburghLng) {
           $person['distance'] = haversineGreatCircleDistance($edinburghLat, $edinburghLng, $person['latitude'], $person['longitude']);
           return $person;
